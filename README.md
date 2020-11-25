@@ -110,6 +110,49 @@ client.ping(22222, '172.18.0.22')
   })
 ```
 
+## Misc
+
+### SDP: Session Description Protocol (RFC4566)
+
+When initiating multimedia teleconferences, voice-over-IP calls,
+streaming video, or other sessions, there is a requirement to convey
+media details, transport addresses, and other session description
+metadata to the participants.
+
+SDP provides a standard representation for such information,
+irrespective of how that information is transported.  SDP is purely a
+format for session description -- it does not incorporate a transport
+protocol, and it is intended to use different transport protocols as
+appropriate, including the Session Announcement Protocol [14],
+Session Initiation Protocol [15], Real Time Streaming Protocol [16],
+electronic mail using the MIME extensions, and the Hypertext
+Transport Protocol.
+
+###  SIP: Session Initiation Protocol (RFC3261)
+
+There are many applications of the Internet that require the creation
+and management of a session, where a session is considered an
+exchange of data between an association of participants.  The
+implementation of these applications is complicated by the practices
+of participants: users may move between endpoints, they may be
+addressable by multiple names, and they may communicate in several
+different media - sometimes simultaneously.  Numerous protocols have
+been authored that carry various forms of real-time multimedia
+session data such as voice, video, or text messages.  The Session
+Initiation Protocol (SIP) works in concert with these protocols by
+enabling Internet endpoints (called user agents) to discover one
+another and to agree on a characterization of a session they would
+like to share.  For locating prospective session participants, and
+for other functions, SIP enables the creation of an infrastructure of
+network hosts (called proxy servers) to which user agents can send
+registrations, invitations to sessions, and other requests.  SIP is
+an agile, general-purpose tool for creating, modifying, and
+terminating sessions that works independently of underlying transport
+protocols and without dependency on the type of session that is being
+established.
+
+[What is SIP?](https://www.youtube.com/watch?v=erICfPV8-Lg)
+
 ## Useful resources
 
 - [docker-image](https://github.com/davehorton/docker-rtpengine)
