@@ -128,6 +128,8 @@ Session Initiation Protocol [15], Real Time Streaming Protocol [16],
 electronic mail using the MIME extensions, and the Hypertext
 Transport Protocol.
 
+[Offer/Answer](https://tools.ietf.org/html/rfc4317)
+
 ###  SIP: Session Initiation Protocol (RFC3261)
 
 There are many applications of the Internet that require the creation
