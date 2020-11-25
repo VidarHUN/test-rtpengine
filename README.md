@@ -110,6 +110,20 @@ client.ping(22222, '172.18.0.22')
   })
 ```
 
+## Try to send traffic to rtpengine
+
+```
+ffmpeg -re -i Recording.amr -ar 8000 -f mulaw -f rtp rtp://172.18.0.22:22222
+```
+
+Tried with `wav`, `m4a` and `amr`, but every time I get this:
+
+```
+WARNING: Received invalid data on NG port (no cookie)
+```
+
+In theory the rtpengine supports `amr` codec. 
+
 ## Misc
 
 ### SDP: Session Description Protocol (RFC4566)
@@ -154,6 +168,28 @@ protocols and without dependency on the type of session that is being
 established.
 
 [What is SIP?](https://www.youtube.com/watch?v=erICfPV8-Lg)
+
+#### SIP Offer/Answer model (RFC6337)
+
+The offer/answer model itself is independent from the higher layer
+application protocols that utilize it.  SIP is one of the
+applications using the offer/answer model.  [RFC3264] defines the
+offer/answer model, but does not specify which SIP messages should
+convey an offer or an answer.  This should be defined in the SIP core
+and extension RFCs.
+
+In theory, any SIP message can include a session description in its
+body.  But a session description in a SIP message is not necessarily
+an offer or an answer.  Only certain session description usages that
+conform to the rules described in Standards-Track RFCs can be
+interpreted as an offer or an answer.  The rules for how to handle
+the offer/answer model are defined in several RFCs.
+
+The offer/answer model defines a mechanism for update of sessions.
+In SIP, a dialog is used to associate an offer/answer exchange with
+the session that it is to update.  In other words, only the offer/
+answer exchange in the SIP dialog can update the session that is
+managed by that dialog.
 
 ## Useful resources
 
