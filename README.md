@@ -67,7 +67,7 @@ client.ping(22222, '172.18.0.22')
 
 ## Useful resources
 
-[docker-image](https://github.com/davehorton/docker-rtpengine)
-[rtp-engine-client](https://github.com/davehorton/rtpengine-client)
-[telecom-rtpengine](https://telecom.altanai.com/tag/rtp-engine/)
-[sip-rtpengine](https://github.com/sipwise/rtpengine)
+- [docker-image](https://github.com/davehorton/docker-rtpengine)
+- [rtp-engine-client](https://github.com/davehorton/rtpengine-client)
+- [telecom-rtpengine](https://telecom.altanai.com/tag/rtp-engine/)
+- [sip-rtpengine](https://github.com/sipwise/rtpengine)
