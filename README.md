@@ -110,6 +110,11 @@ client.ping(22222, '172.18.0.22')
   })
 ```
 
+## Send offer to rtpengine 
+
+Please view offer.js in lib directory and run it with node, while the rtpengine 
+is running. You should get an Answer with ok and the the sdp. 
+
 ## Try to send traffic to rtpengine
 
 ```
