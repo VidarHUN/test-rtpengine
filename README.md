@@ -96,7 +96,6 @@ on `172.18.0.22:22222`.
 
 ## Simple client
 
-
 ``` javascript
 const Client = require('rtpengine-client').Client ;
 const client = new Client() ;
@@ -114,6 +113,23 @@ client.ping(22222, '172.18.0.22')
 
 Please view offer.js in lib directory and run it with node, while the rtpengine 
 is running. You should get an Answer with ok and the the sdp. 
+
+## Install rtptools
+
+```
+git clone https://github.com/irtlab/rtptools.git
+cd rtptools 
+./configure && make 
+sudo make -n install 
+```
+
+Running:
+
+```
+sudo /usr/local/bin/rtpsend -a -l -s 80 -f amrnb_fv_to_mrsv0.hex.rtp 172.18.0.22/22222
+```
+
+[More-about-rtptools](http://www.cs.cmu.edu/~./libra-demo/rtptools-1.17/rtptools.html)
 
 ## Try to send traffic to rtpengine
 
