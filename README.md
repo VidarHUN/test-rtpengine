@@ -99,6 +99,16 @@ rtpengine will always differentiate between:
   - created via SADD notification
   - destroyed DEL, FINAL_TIMEOUT or cli
 
+## Instal local rtpengine 
+
+```
+git clone https://github.com/sipwise/rtpengine.git
+cd rtpengine
+dpkg-buildpackage
+export DEB_BUILD_PROFILES="pkg.ngcp-rtpengine.nobcg729"
+# Install everything from the output error 
+```
+
 ## Set up docker for rtpengine 
 
 You have to define a new docker network, but you can use the default with 
