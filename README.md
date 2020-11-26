@@ -142,6 +142,7 @@ Session Initiation Protocol [15], Real Time Streaming Protocol [16],
 electronic mail using the MIME extensions, and the Hypertext
 Transport Protocol.
 
+[Wiki-notes](https://en.wikipedia.org/wiki/Session_Description_Protocol)
 [Offer/Answer](https://tools.ietf.org/html/rfc4317)
 
 ###  SIP: Session Initiation Protocol (RFC3261)
