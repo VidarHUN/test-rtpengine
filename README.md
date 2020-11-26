@@ -292,6 +292,10 @@ established.
 
 [What is SIP?](https://www.youtube.com/watch?v=erICfPV8-Lg)
 
+Within SIP are user agents, known as endpoints, that can start, change 
+or end a session. Endpoints can be mobile devices, softphones or laptops. 
+User agents work with the SIP server in order to make your calls happen. 
+
 #### SIP Offer/Answer model (RFC6337)
 
 The offer/answer model itself is independent from the higher layer
@@ -313,6 +317,38 @@ In SIP, a dialog is used to associate an offer/answer exchange with
 the session that it is to update.  In other words, only the offer/
 answer exchange in the SIP dialog can update the session that is
 managed by that dialog.
+
+#### SIP server
+
+A SIP server, also known as a SIP Proxy, deals with all the management 
+of SIP calls in a network and is responsible for taking requests from 
+the user agents in order to place and terminate calls. SIP Servers are 
+usually included inside of SIP-enabled IP-PBXs. We can work with your 
+PBX equipment vendor to make it SIP-enabled. If you already have a PBX, 
+chances are we have the capability to connect to your PBX.
+
+Think of your SIP proxy server as the “middleman” of your SIP calls. 
+As the middleman, it’s responsible for transmitting calls and ending 
+them through stateless and stateful servers.
+
+- **Stateless Server**: A stateless server forwards a message it receives 
+  and doesn’t store any information. In fact, stateless servers will 
+  “forget” a request as soon as it’s been passed along.
+- **Stateful Server**: A stateful proxy server is kind of like a storage 
+  bank. It keeps track of requests and responses that have been received 
+  and can even store them to use in the future.
+
+There are several servers that work with the SIP networks including location, 
+redirect and registrar servers.
+
+- The **location server** administers information about caller location to 
+  the redirect and SIP proxy server. 
+- The **redirect server** is what is responsible for receiving requests and 
+  going through the registrar server location database to find the recipient. 
+- The **registrar server** identifies and accepts requests from user agents, 
+  which is how users are authenticated in a SIP network. 
+
+[What-is-a-sip-server](https://www.telnetww.com/blog/voice/what-is-a-sip-server/)
 
 ## Useful resources
 
