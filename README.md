@@ -107,6 +107,14 @@ cd rtpengine
 dpkg-buildpackage
 export DEB_BUILD_PROFILES="pkg.ngcp-rtpengine.nobcg729"
 # Install everything from the output error 
+cd .. 
+# Install the .deb packages what it is generated with dpkg -i <package>
+```
+
+After you can use like that: 
+
+```
+rtpengine --config-file sample-rtpengine.conf
 ```
 
 ## Set up docker for rtpengine 
