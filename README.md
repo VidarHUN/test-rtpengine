@@ -241,6 +241,10 @@ If you want too use one of the scripts in the `lib` directory:
 node lib/index.js <port> <ipv4-address>
 ```
 
+```
+node lib/offer.js <port> <ipv4-address> <path-to-offer.txt>
+```
+
 ## Install rtptools
 
 ```
