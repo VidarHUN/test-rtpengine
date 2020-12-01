@@ -1,5 +1,5 @@
 {
-  "sdp":"v=0\r\no=John 0844526 2890844526 IN IP4 127.0.0.1\r\ns=-\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio 6000 RTP/AVP 97 98\r\na=rtpmap:97 AMR/16000/1\r\na=rtpmap:98 AMR-WB/8000/1",
+  "sdp":"v=0\r\no=John 0844526 2890844526 IN IP4 127.0.0.1\r\ns=-\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio 6000 RTP/AVP 126 127\r\na=rtpmap:126 AMR/16000/1\r\na=rtpmap:127 AMR-WB/8000/1",
   "call-id":"1",
   "from-tag":"1"
 }

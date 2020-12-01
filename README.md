@@ -93,7 +93,6 @@ contain the `SIP`
 #### delete
 
 
-
 ### Redis keyspace notifications
 
 The Redis keyspace notifications can be used as a mean to synchronize session 
@@ -117,7 +116,7 @@ rtpengine will always differentiate between:
   - created via SADD notification
   - destroyed DEL, FINAL_TIMEOUT or cli
 
-## Instal local rtpengine 
+## Install local rtpengine 
 
 ```
 git clone https://github.com/sipwise/rtpengine.git
