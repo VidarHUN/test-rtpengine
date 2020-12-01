@@ -76,6 +76,24 @@ All keys and values are case-sensitive unless specified otherwise. The
 requirement stipulated by the bencode standard that dictionary keys must 
 be present in lexicographical order is not currently honoured.
 
+#### Ping
+
+With `ping` you can check if the rtpengine is reachable.
+
+#### offer
+
+This is the request when you want to speak with someone first you will send out 
+an offer containing and `sdp`, `call-id` and a `from-tag`. 
+
+#### answer
+
+Identical to the offer message, but this has to contain the `to-tag` which 
+contain the `SIP`
+
+#### delete
+
+
+
 ### Redis keyspace notifications
 
 The Redis keyspace notifications can be used as a mean to synchronize session 
