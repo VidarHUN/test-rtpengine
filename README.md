@@ -1,5 +1,7 @@
 # How to use rtpengine with docker 
 
+![setup](./setup.svg)
+
 ## What is rtpengine? 
 
 RTPengine is a proxy for RTP traffic and other UDP based media 
