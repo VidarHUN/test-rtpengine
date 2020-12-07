@@ -1,0 +1,8 @@
+{
+    "ICE":"remove",
+    "call-id":"0.5423403855684267",
+    "command":"offer",
+    "from-tag":"0.4166036407436595",
+    "label":"caller",
+    "sdp":"v=0\r\no=- 1607444729 1 IN IP4 192.168.1.97\r\ns=tester\r\nt=0 0\r\nm=audio 2000 RTP/AVP 0\r\nc=IN IP4 192.168.1.97\r\na=sendrecv\r\na=rtcp:2001"
+}
