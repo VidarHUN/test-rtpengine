@@ -1,5 +1,6 @@
 {
     "sdp":"v=0\r\no=John 0844526 2890844526 IN IP4 127.0.0.1\r\ns=-\r\nc=IN IP4 127.0.0.1\r\nt=0 0\r\nm=audio 6000 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000/1",
     "call-id":"1",
-    "from-tag":"1"
+    "from-tag":"1",
+    "via-branch":"test-call"
   }
