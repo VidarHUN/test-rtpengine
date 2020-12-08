@@ -1,129 +1,104 @@
-# Test setup for use rtpengine with rtpengine-client
+# Make a call
 
-Start rtpengine with `--log-level=7` to see everything and use 
-the `sample-rtpengine.conf`. 
+Please navigate to the project root directory and follow the 
+instructions below. 
 
-```
-sudo rtpengine --config-file sample-rtpengine.conf --log-level=7
-```
+## Setup RTPengine 
 
-Thats  will listen on `localhost:22222` so you have to use that
-address. 
-
-Connect with clients:
-
-John: 
+Just run the command below, and this will start an rtpengine instance 
+which listen on `127.0.0.1:22222`. So the node.js client should 
+connect to this address. 
 
 ```
-node lib/offer.js 22222 127.0.0.1 /home/richard/Desktop/Ericsson/test-rtpengine/sdps/jhon.json
+sudo rtpengine --config-file sample-rtpengine.conf
 ```
 
-Answer: 
+## Clients (Offer/Answer)
 
-```json
-{
-  sdp: 'v=0\r\n' +
-    'o=John 0844526 2890844526 IN IP4 127.0.0.1\r\n' +
-    's=-\r\n' +
-    'c=IN IP4 127.0.0.1\r\n' +
-    't=0 0\r\n' +
-    'm=audio 23000 RTP/AVP 97 98\r\n' +
-    'a=rtpmap:97 AMR/16000/1\r\n' +
-    'a=rtpmap:98 AMR-WB/8000/1\r\n' +
-    'a=sendrecv\r\n' +
-    'a=rtcp:23001\r\n',
-}
-```
-Please notice the `'m=audio 23000 RTP/AVP 97 98\r\n'` line because later you have to send 
-traffic to that port. This field could be different on each run. 
-
-Alice:
+First you have to make an **offer** to register a caller client in 
+**rtpengine**. For this please run the code below to receive the 
+modified **SDP** which will needed to simulate a call. And you should 
+search for a port number between `23000-32768`. 
 
 ```
-node lib/offer.js 22222 127.0.0.1 /home/richard/Desktop/Ericsson/test-rtpengine/sdps/alice.json
+node lib/offer.js 22222 127.0.0.1 sdps/perl/caller.json
 ```
 
-Answer: 
+Please see the **caller.json** [here](../sdps/perl/caller.json)
 
-```json
-{
-  sdp: 'v=0\r\n' +
-    'o=Alice 0844516 2890844516 IN IP4 127.0.0.1\r\n' +
-    's=-\r\n' +
-    'c=IN IP4 127.0.0.1\r\n' +
-    't=0 0\r\n' +
-    'm=audio 23024 RTP/AVP 97 98\r\n' +
-    'a=rtpmap:97 AMR/16000/1\r\n' +
-    'a=rtpmap:98 AMR-WB/8000/1\r\n' +
-    'a=sendrecv\r\n' +
-    'a=rtcp:23025\r\n',
-  result: 'ok'
-}
-```
-
-Please notice the `'m=audio 23024 RTP/AVP 97 98\r\n'` line because later you have to send 
-traffic to that port. This field could be different on each run. 
-
-Now you can send traffic through `rtpengine`, but now this will only appear as 
-some garbage data what the client can't decode. 
-
-Send traffic: 
+If write down the port e.g. **23000** you have to make an answer 
+from the callee to make a **dialog** between them. 
 
 ```
-sudo /usr/local/bin/rtpsend -a -l -s 6000 -f rtp_files/amrnb_fv_to_mrsv0.hex.rtp 127.0.0.1/23000
+node lib/answer.js 22222 127.0.0.1 sdps/perl/callee.json
 ```
 
-Notice that, the destination address is the `m` field in Jhon's answer. 
+Please see the **callee.json** [here](../sdps/perl/caller.json)
 
-Currently you can check the traffic flow with `socat`, because the client will fail 
-while trying to decode the message. 
+Write down that port too e.g. **23012**.
 
-```
-socat -d udp-l:7000 -  
-```
+Now terminate the calls, beacouse you have to send traffic from port 
+**2000** and **2004** which currently used. So free them up. 
 
-You should see some garbage when the `rtpsend` starts. 
+This proccess will look like something like this: 
 
-Let's see what will record the `rtpdump` on port 7000. 
+![offer-answer](./offer-answer.svg)
 
-```
-rtpdump -o dump.rtp 127.0.0.1/7000
-```
+## Run TCPdump
 
-The following rtp file generated without any data per record: 
+To examine the result you should run the `tcpdump` tool just like 
+below. This command will creata file named `traffic.pcap` which 
+contains the rtp packets. 
 
 ```
-1606822194.838536 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=1 pt=127 ((null),0,0) seq=15613 ts=1628629055 ssrc=0x76832b0c 
-1606822194.859002 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15614 ts=1628629215 ssrc=0x76832b0c 
-1606822194.877622 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15615 ts=1628629375 ssrc=0x76832b0c 
-1606822194.898746 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15616 ts=1628629535 ssrc=0x76832b0c 
-1606822194.917935 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15617 ts=1628629695 ssrc=0x76832b0c 
-1606822194.938082 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15618 ts=1628629855 ssrc=0x76832b0c 
-1606822194.958229 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15619 ts=1628630015 ssrc=0x76832b0c 
-1606822194.977806 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15620 ts=1628630175 ssrc=0x76832b0c 
-1606822195.002115 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15621 ts=1628630335 ssrc=0x76832b0c 
-1606822195.017860 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15622 ts=1628630495 ssrc=0x76832b0c 
-1606822195.039562 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15623 ts=1628630655 ssrc=0x76832b0c 
-1606822195.057878 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15624 ts=1628630815 ssrc=0x76832b0c 
-1606822195.083696 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15625 ts=1628630975 ssrc=0x76832b0c 
-1606822195.098646 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15626 ts=1628631135 ssrc=0x76832b0c 
-1606822195.118599 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15627 ts=1628631295 ssrc=0x76832b0c 
-1606822195.138673 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15628 ts=1628631455 ssrc=0x76832b0c 
-1606822195.158367 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15629 ts=1628631615 ssrc=0x76832b0c 
-1606822195.179924 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15630 ts=1628631775 ssrc=0x76832b0c 
-1606822195.202116 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15631 ts=1628631935 ssrc=0x76832b0c 
-1606822195.219403 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15632 ts=1628632095 ssrc=0x76832b0c 
-1606822195.238925 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15633 ts=1628632255 ssrc=0x76832b0c 
-1606822195.259999 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15634 ts=1628632415 ssrc=0x76832b0c 
-1606822195.278216 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15635 ts=1628632575 ssrc=0x76832b0c 
-1606822195.299299 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15636 ts=1628632735 ssrc=0x76832b0c 
-1606822195.318932 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15637 ts=1628632895 ssrc=0x76832b0c 
-1606822195.340076 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15638 ts=1628633055 ssrc=0x76832b0c 
-1606822195.357984 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15639 ts=1628633215 ssrc=0x76832b0c 
-1606822195.378104 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15640 ts=1628633375 ssrc=0x76832b0c 
-1606822195.399046 RTP len=19 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15641 ts=1628633535 ssrc=0x76832b0c 
-1606822195.458333 RTP len=19 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=0 pt=127 ((null),0,0) seq=15642 ts=1628634015 ssrc=0x76832b0c 
-1606822195.558175 RTP len=45 from=127.0.0.1:23014 v=2 p=0 x=0 cc=0 m=1 pt=127 ((null),0,0) seq=15643 ts=1628634815 ssrc=0x76832b
+sudo tcpdump -i any udp -vvn -w traffic.pcap
 ```
 
-No `data` field could be a problem! 
+## Generate traffic
+
+To generate traffic I used `ffmpeg`, but if you want to use other tool 
+you can. 
+
+Generate traffic from **caller**:
+
+```
+sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23000?localrtpport=2000'
+```
+
+What does this line do? Basicly send a PCMU rtp stream from caller to callee.
+
+Parts of the command: 
+
+- `-re -i`: Read input at native frame rate. Mainly used to simulate a grab device, or live 
+  input stream (e.g. when reading from a file). Should not be used with actual grab 
+  devices or live input streams (where it can cause packet loss). By default ffmpeg attempts 
+  to read the input(s) as fast as possible. This option will slow down the reading of the 
+  input(s) to the native frame rate of the input(s). It is useful for real-time output 
+  (e.g. live streaming).
+  - **audios/recordning.wav**: This is a bearly 1 min long PCM audio file. 
+- `-ar`: Set the audio sampling frequency. For output streams it is set by default to the 
+  frequency of the corresponding input stream. For input streams this option only makes 
+  sense for audio grabbing devices and raw demuxers and is mapped to the corresponding 
+  demuxer options.
+- `-ac`: Set the number of audio channels. For output streams it is set by default to the 
+  number of input audio channels. For input streams this option only makes sense for audio 
+  grabbing devices and raw demuxers and is mapped to the corresponding demuxer options.
+- `-acodec`: Set the audio codec. This is an alias for `-codec:a`.
+- `-f`:Force input or output file format. The format is normally auto detected for input 
+  files and guessed from the file extension for output files, so this option is not 
+  needed in most cases.
+- `localrtpport`: Set the rtp stream source port. 
+
+And if you want to generate traffic from callee -> caller then you should use this command:
+
+```
+sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23012?localrtpport=2004'
+```
+
+## Examine data in wireshark
+
+You should see something like that if you open the generated `pcap` file:
+
+![data](./traffic.png)
+
+The `pcap` can be found [here](./traffic.pcap)

@@ -30,6 +30,8 @@ Then create an **answer**:
 node lib/answer.js 22222 127.0.0.1 sdps/perl/callee.json
 ```
 
+Now terminate the nodes 
+
 After this you should send rtpstream by **ffmpeg**: 
 
 ```
