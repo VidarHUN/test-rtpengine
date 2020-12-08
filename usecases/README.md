@@ -35,7 +35,7 @@ node lib/answer.js 22222 127.0.0.1 sdps/perl/callee.json
 
 Please see the **callee.json** [here](../sdps/perl/caller.json)
 
-Write down that port too e.g. **23012**.
+Write down that port too e.g. **23016**.
 
 Now terminate the calls, beacouse you have to send traffic from port 
 **2000** and **2004** which currently used. So free them up. 
@@ -92,7 +92,7 @@ Parts of the command:
 And if you want to generate traffic from callee -> caller then you should use this command:
 
 ```
-sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23012?localrtpport=2004'
+sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23016?localrtpport=2004'
 ```
 
 ## Examine data in wireshark
