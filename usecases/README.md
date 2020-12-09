@@ -65,6 +65,11 @@ Generate traffic from **caller**:
 sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23000?localrtpport=2000'
 ```
 
+Trying
+```
+sudo ffmpeg -re -i ../audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23054?localrtpport=2000' -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23066?localrtpport=2004'
+```
+
 What does this line do? Basicly send a PCMU rtp stream from caller to callee.
 
 Parts of the command: 
