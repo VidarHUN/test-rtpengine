@@ -4,6 +4,6 @@
     "command":"answer",
     "from-tag":"0.4166036407436595",
     "label":"callee",
-    "sdp":"v=0\r\no=- 1607446271 1 IN IP4 172.17.0.1\r\ns=tester\r\nt=0 0\r\nm=audio 2004 RTP/AVP 0\r\nc=IN IP4 172.17.0.1\r\na=sendrecv\r\na=rtcp:2005",
+    "sdp":"v=0\r\no=- 1607446271 1 IN IP4 127.0.0.1\r\ns=tester\r\nt=0 0\r\nm=audio 2004 RTP/AVP 0\r\nc=IN IP4 127.0.0.1\r\na=sendrecv\r\na=rtcp:2005",
     "to-tag":"0.237720042595431"
 }
