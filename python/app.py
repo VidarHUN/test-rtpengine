@@ -2,6 +2,7 @@ import bencodepy # pip install bencode.py
 import sdp_transform # pip install sdp-transform
 import argparse
 import json
+import time
 import socket
 import sys
 import random
@@ -20,11 +21,15 @@ parser.add_argument('--answer', '-a', type=str, dest='answer', help='place of th
 parser.add_argument('--bind_offer', '-bo', nargs=2, default=['127.0.0.1', '2000'], dest='bind_offer',
                     help='address port for offer source')
 parser.add_argument('--bind_answer', '-ba', nargs=2, default=['127.0.0.1', '2004'], dest='bind_answer',
-                    help='address port for answer source') 
+                    help='address port for answer source')
 
-# TODO: Make it possible to receive traffic and send it to rtpengine
-# That's should containt a JSON file to control
-
+# Proxy part
+parser.add_argument('--server', '-s', type=int, dest='server', choices=[0,1], 
+                    help='1 - proxy mode, 0 - simple mode')
+parser.add_argument('--server_address', '-sa', type=str, dest='server_address', 
+                    help='listening address')
+parser.add_argument('--server_port', '-sp', type=int, dest='server_port', 
+                    help='listening port') 
 args = parser.parse_args()
 
 # Set up the bancode library
@@ -60,25 +65,35 @@ def send(file, bind_address, bind_port):
     
     return result
 
-# Read files
-if args.offer:
-    with open(args.offer) as o:
-        offer = json.load(o)
-    response = send(offer, args.bind_offer[0], int(args.bind_offer[1]))
-    parsed_sdp_dict = sdp_transform.parse(response.get('sdp'))
-    print("RTP port from offer: %d" % parsed_sdp_dict.get('media')[0].get('port'))
-    print("RTCP port from offer: %d" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
-if args.answer:
-    with open(args.answer) as a:
-        answer = json.load(a)
-    response = send(answer, args.bind_answer[0], int(args.bind_answer[1]))
-    parsed_sdp_dict = sdp_transform.parse(response.get('sdp'))
-    print("RTP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('port'))
-    print("RTCP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
+if not args.server:
+    # Read files
+    if args.offer:
+        with open(args.offer) as o:
+            offer = json.load(o)
+        response = send(offer, args.bind_offer[0], int(args.bind_offer[1]))
+        parsed_sdp_dict = sdp_transform.parse(response.get('sdp'))
+        print("RTP port from offer: %d" % parsed_sdp_dict.get('media')[0].get('port'))
+        print("RTCP port from offer: %d" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
+    if args.answer:
+        with open(args.answer) as a:
+            answer = json.load(a)
+        response = send(answer, args.bind_answer[0], int(args.bind_answer[1]))
+        parsed_sdp_dict = sdp_transform.parse(response.get('sdp'))
+        print("RTP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('port'))
+        print("RTCP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
+else:
+    IP = '127.0.0.1'
+    PORT = 5000
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((args.server_address, args.server_port))
+    print("Listening on %s:%d" % (args.server_address, args.server_port))
+    while True:
+        data, addr = sock.recvfrom(1024)
+        time.sleep(1)
+        response = send(json.loads(data.decode()), addr[0], int(addr[1]))
+        parsed_sdp_dict = sdp_transform.parse(response.get('sdp'))
+        print("RTP port from rtpengine: %d" % parsed_sdp_dict.get('media')[0].get('port'))
+        print("RTCP port from rtpengine: %d\n" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
 
 # TODO: Somehow make statistics about the traffic quality 
 # Maybe you van use pyshark or a tcpdump subprocess
-
-# TODO: Implement network functionality. Be able to receive a packet change it 
-# and forderd to the rtpengine
-
