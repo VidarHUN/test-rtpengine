@@ -82,8 +82,6 @@ if not args.server:
         print("RTP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('port'))
         print("RTCP port from answer: %d" % parsed_sdp_dict.get('media')[0].get('rtcp').get('port'))
 else:
-    IP = '127.0.0.1'
-    PORT = 5000
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((args.server_address, args.server_port))
     print("Listening on %s:%d" % (args.server_address, args.server_port))
