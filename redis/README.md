@@ -99,11 +99,81 @@ Current sessions foreign: 2
 Current sessions total: 3
 ```
 
-## Run a redis container
+## Test
+
+First make a redis db.
 
 ```
-docker run --name redis --net rtpengine --ip 172.18.0.30 -d redis
+docker run --net rtpengine --ip 172.18.0.30 -v /redis/redis.conf:/usr/local/etc/redis/redis.conf --name redis redis redis-server /usr/local/etc/redis/redis.conf
 ```
 
+The redis database is running with `notify-keyspace-events KEA`. 
 
+Tun an rtpengine instance with this configuration: 
 
+```
+[rtpengine]
+interface=pub1/127.0.0.1;pub2/127.0.0.2
+redis=172.18.0.30:6379/1
+subscribe-keyspace=2
+
+foreground=true
+log-stderr=true
+listen-ng=127.0.0.1:22222
+port-min=23000
+port-max=32768
+recording-dir=/tmp
+recording-method=pcap
+recording-format=eth
+log-level=6
+delete-delay=0
+timeout=600
+```
+
+Initialize a call with the python client: 
+
+```
+python clients/python/app.py -o sdps/perl/caller.json -a sdps/perl/callee.json
+```
+
+List the active calls: 
+
+```
+$ python clients/python/app.py -f sdps/list.json
+{'calls': ['0.5423403855684267'], 'result': 'ok'}
+```
+
+Now fire up the the second rtpengine instance with this config: 
+
+```
+[rtpengine]
+interface=pub2/127.0.0.2;pub1/127.0.0.1
+redis=172.18.0.30:6379/2
+subscribe-keyspace=1
+
+foreground=true
+log-stderr=true
+listen-ng=127.0.0.1:22222
+port-min=23000
+port-max=32768
+recording-dir=/tmp
+recording-method=pcap
+recording-format=eth
+log-level=6
+delete-delay=0
+timeout=600
+```
+
+Close the other rtpengine instance and list the calls again. You should 
+see same as before. 
+
+It also works during a normal call, but there may be a small turnaround 
+time while the new instance can handle the call. The associated ffmpeg 
+instructions can be found here. But in addition, the folder also contains 
+a pcap, in which you can see such a change after about 500 packets.
+
+```
+sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23000?localrtpport=2000'
+
+sudo ffmpeg -re -i audios/recording.wav -ar 8000 -ac 1 -acodec pcm_mulaw -f rtp 'rtp://127.0.0.1:23018?localrtpport=2004'
+```

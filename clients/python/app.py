@@ -22,6 +22,7 @@ parser.add_argument('--bind_offer', '-bo', nargs=2, default=['127.0.0.1', '2000'
                     help='address port for offer source')
 parser.add_argument('--bind_answer', '-ba', nargs=2, default=['127.0.0.1', '2004'], dest='bind_answer',
                     help='address port for answer source')
+parser.add_argument('--file', '-f', type=str, dest='file', help="A simple file to list or query")
 
 # Proxy part
 parser.add_argument('--server', '-s', type=int, dest='server', choices=[0,1], 
@@ -66,6 +67,11 @@ def send(file, bind_address, bind_port):
     return result
 
 if not args.server:
+    if args.file:
+        with open(args.file) as f:
+            file = json.load(f)
+        response = send(file, "127.0.0.1", 3000)
+        print(response)
     # Read files
     if args.offer:
         with open(args.offer) as o:
