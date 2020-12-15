@@ -24,10 +24,12 @@ parser.add_argument('--bind_offer', '-bo', nargs=2, default=['127.0.0.1', '2000'
 parser.add_argument('--bind_answer', '-ba', nargs=2, default=['127.0.0.1', '2004'], dest='bind_answer',
                     help='address port for answer source')
 parser.add_argument('--file', '-f', type=str, dest='file', help="A simple file to list or query")
-parser.add_argument('--ffmpeg', '-ff', type=int, dest='ffmpeg', 
+parser.add_argument('--ffmpeg', '-ff', type=int, choices=[1], dest='ffmpeg', 
                     help="If specified, it will start a certain number of ffmpeg processes")
 parser.add_argument('--audio_file', '-af', type=str, dest='audio_file', help="Path of the audio to ffmpeg")
 parser.add_argument('--tcpdump', '-t', type=str, dest='tcpdump', help='tcpdump interface')
+parser.add_argument('--generate_calls', "-gc", type=int, dest='generate_calls', 
+                    help='generate certain number of parallel calls with traffic')
 
 # Proxy part
 parser.add_argument('--server', '-s', type=int, dest='server', choices=[0,1], 
@@ -75,15 +77,61 @@ def send(file, bind_address, bind_port):
 # Run a certain number of ffmpeg command 
 def ffmpeg(cnt, offer_rtp_address, answer_rtp_address):
     procs = []
-    for _ in range(cnt):
-        procs.append(subprocess.Popen(["ffmpeg", "-re", "-i", args.audio_file, "-ar", "8000", "-ac", "1", "-acodec", "pcm_mulaw", "-f", "rtp", offer_rtp_address]))
-        procs.append(subprocess.Popen(["ffmpeg", "-re", "-i", args.audio_file, "-ar", "8000", "-ac", "1", "-acodec", "pcm_mulaw", "-f", "rtp", answer_rtp_address]))
+    for c in range(cnt):
+        procs.append(subprocess.Popen(["ffmpeg", "-re", "-i", args.audio_file, "-ar", "8000", "-ac", "1", "-acodec", "pcm_mulaw", "-f", "rtp", offer_rtp_address[c]]))
+        procs.append(subprocess.Popen(["ffmpeg", "-re", "-i", args.audio_file, "-ar", "8000", "-ac", "1", "-acodec", "pcm_mulaw", "-f", "rtp", answer_rtp_address[c]]))
     for proc in procs:
         proc.communicate()
 
 # Run tcpdump in the background on a given interface
 def tcpdump():
     return subprocess.Popen(["sudo", "tcpdump", "-i", args.tcpdump, "udp", "-vvn", "-w", "traffic.pcap"])
+
+def generateAnswer(call_id, label, from_tag, to_tag, port):
+    data = {}
+    data["ICE"] = "remove"
+    data["call-id"] = str(call_id)
+    data["command"] = "answer"
+    data["from-tag"] = str(from_tag)
+    data["label"] = str(label)
+    data["sdp"] = "v=0\r\no=- 1607446271 1 IN IP4 127.0.0.1\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 127.0.0.1\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
+    data["to-tag"] = str(to_tag)
+    return data
+
+def generateOffer(call_id, label, from_tag, port):
+    data = {}
+    data["ICE"] = "remove"
+    data["call-id"] = str(call_id)
+    data["command"] = "offer"
+    data["from-tag"] = str(from_tag)
+    data["label"] = str(label)
+    data["sdp"] = "v=0\r\no=- 1607444729 1 IN IP4 127.0.0.1\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 127.0.0.1\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
+    return data
+
+def generateCalls(cnt):
+    start_port = 3000
+    offers = []
+    answers = []
+    for _ in range(cnt):
+        start_port += 2
+        offer = send(generateOffer(str(start_port) + "-" + str(start_port + 2), "caller" + str(start_port), 
+            "from-tag" + str(start_port), start_port), 
+            "127.0.0.1", start_port)
+        start_port += 2
+        answer = send(generateAnswer(str(start_port - 2) + "-" + str(start_port), "callee" + str(start_port), 
+            "from-tag" + str(start_port - 2), "to-tag" + str(start_port), start_port), 
+            "127.0.0.1", start_port)
+        parsed_offer = sdp_transform.parse(offer.get('sdp'))
+        parsed_answer = sdp_transform.parse(answer.get('sdp'))
+        offer_port = parsed_offer.get('media')[0].get('port')
+        answer_port = parsed_answer.get('media')[0].get('port')
+        
+        offers.append("rtp://127.0.0.1:" + str(offer_port) + "?localrtpport=" + str(start_port - 2))
+        answers.append("rtp://127.0.0.1:" + str(answer_port) + "?localrtpport=" + str(start_port))
+    time.sleep(1)
+    
+    ffmpeg(cnt, offers, answers)
+
 
 if args.tcpdump:
     tcpdump_proc = tcpdump()
@@ -113,6 +161,8 @@ if not args.server:
         answer_rtcp_port = parsed_sdp_dict.get('media')[0].get('rtcp').get('port')
         print("RTP port from answer: %d" % answer_rtp_port )
         print("RTCP port from answer: %d" % answer_rtcp_port)
+    if args.generate_calls:
+        generateCalls(args.generate_calls)
 else:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((args.server_address, args.server_port))
@@ -127,9 +177,9 @@ else:
 
 if args.offer and args.answer:
     time.sleep(1)
-    offer_rtp_address = "rtp://127.0.0.1:" + str(offer_rtp_port) + "?localrtpport=" + str(args.bind_offer[1])
-    answer_rtp_address = "rtp://127.0.0.1:" + str(answer_rtp_port) + "?localrtpport=" + str(args.bind_answer[1])
-    ffmpeg(int(args.ffmpeg), offer_rtp_address, answer_rtp_address)
+    offer_rtp_address = ["rtp://127.0.0.1:" + str(offer_rtp_port) + "?localrtpport=" + str(args.bind_offer[1])]
+    answer_rtp_address = ["rtp://127.0.0.1:" + str(answer_rtp_port) + "?localrtpport=" + str(args.bind_answer[1])]
+    ffmpeg(1, offer_rtp_address, answer_rtp_address)
 
 if args.tcpdump:
     tcpdump_proc.terminate()
