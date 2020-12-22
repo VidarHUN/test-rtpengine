@@ -11,28 +11,6 @@ Multi-threaded , can advertise different addresses for operation behind NAT.
 
 It bears in-kernel packet forwarding for low-latency and low-CPU performance.
 
-### In-Kernel Packet Forwarding
-
-To avoid the overhead involved in processing each individual RTP packet in 
-userspace-only operation, especially as RTP traffic consists of many small 
-packets at high rates, rtpengine provides a kernel module to offload the bulk 
-of the packet forwarding duties from user space to kernel space. This also 
-results in increasing the number of concurrent calls as CPU usage decreases.
-In-kernel packet forwarding is implemented as an iptables module (`x_tables`) 
-and has 2 parts – `xt_RTPENGINE` and plugin to the iptables and ip6tables 
-command-line utilities.
-
-### Kernel Module
-
-The kernel module supports multiple forwarding tables, identified through 
-their ID number , bydefault 0 to 63.
-
-### iptables module 
-
-In order for the kernel module to be able to actually forward packets, an 
-iptables rule must be set up to send packets into the module. Each such 
-rule is associated with one forwarding table. 
-
 ### ng Control Protocol
 
 In order to enable several advanced features in rtpengine, a new advanced 
