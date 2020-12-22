@@ -1,6 +1,6 @@
 # How to use rtpengine with docker 
 
-![setup](./setup.svg)
+![setup](./setup.png)
 
 ## What is rtpengine? 
 
