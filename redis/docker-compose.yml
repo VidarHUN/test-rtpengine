@@ -1,0 +1,68 @@
+version: "3.9"
+networks:
+  default:
+    external:
+      name: rtpengine
+services:
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks: 
+      default:
+        ipv4_address: "172.18.0.30"
+  rtpengine1:
+    image: "vidarhun/rtpengine"
+    networks: 
+      default:
+        ipv4_address: "172.18.0.31"
+    command:
+      - rtpengine
+      - --interface=pub1/172.18.0.31
+      - --interface=pub2/172.18.0.32
+      - --interface=pub3/172.18.0.33
+      - --redis=172.18.0.30:6379/1
+      - --subscribe-keyspace=2;3
+      - --foreground=true
+      - --log-stderr=true
+      - --listen-ng=127.0.0.1:22222
+      - --log-level=6
+      - --delete-delay=0
+      - --timeout=600
+  rtpengine2:
+    image: "vidarhun/rtpengine"
+    networks:
+      default:
+        ipv4_address: "172.18.0.32"
+    command:
+      - rtpengine
+      - --interface=pub2/172.18.0.32
+      - --interface=pub3/172.18.0.33
+      - --interface=pub1/172.18.0.31
+      - --redis=172.18.0.30:6379/2
+      - --subscribe-keyspace=3;1
+      - --foreground=true
+      - --log-stderr=true
+      - --listen-ng=127.0.0.1:22222
+      - --log-level=6
+      - --delete-delay=0
+      - --timeout=600
+  rtpengine3:
+    image: "vidarhun/rtpengine"
+    networks:
+      default:
+        ipv4_address: "172.18.0.33"
+    command:
+      - rtpengine
+      - --interface=pub3/172.18.0.33
+      - --interface=pub1/172.18.0.31
+      - --interface=pub2/172.18.0.32
+      - --redis=172.18.0.30:6379/3
+      - --subscribe-keyspace=1;2
+      - --foreground=true
+      - --log-stderr=true
+      - --listen-ng=127.0.0.1:22222
+      - --log-level=6
+      - --delete-delay=0
+      - --timeout=600
