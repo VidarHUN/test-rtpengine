@@ -4,7 +4,7 @@ import argparse
 import json
 import time
 import subprocess
-from scapy.utils import rdpcap, hexdump # pip install scapy
+# from scapy.utils import rdpcap, hexdump # pip install scapy
 import socket
 import sys
 import random
@@ -13,33 +13,35 @@ import string
 # Parsing
 parser = argparse.ArgumentParser(description='Control RTPengine through ng control.')
 parser.add_argument('--port', '-p', default=22222, type=int, dest='port',
-                    help='port of the running rtpengine')
+                    help='Port of the running rtpengine')
 parser.add_argument('--address', '-addr', default='127.0.0.1', type=str, dest='addr',
-                    help='address of the running rtpengine')
+                    help='Address of the running rtpengine')
 
 # That's for local testing 
-parser.add_argument('--offer', '-o', type=str, dest='offer', help='place of the offer JSON file')
-parser.add_argument('--answer', '-a', type=str, dest='answer', help='place of the answer JSON file')
+parser.add_argument('--offer', '-o', type=str, dest='offer', help='Place of the offer JSON file')
+parser.add_argument('--answer', '-a', type=str, dest='answer', help='Place of the answer JSON file')
 parser.add_argument('--bind_offer', '-bo', nargs=2, default=['127.0.0.1', '2000'], dest='bind_offer',
-                    help='address port for offer source')
+                    help='Address port for offer source')
 parser.add_argument('--bind_answer', '-ba', nargs=2, default=['127.0.0.1', '2004'], dest='bind_answer',
-                    help='address port for answer source')
+                    help='Address port for answer source')
 parser.add_argument('--file', '-f', type=str, dest='file', help="A simple file to list or query")
 parser.add_argument('--ffmpeg', '-ff', type=int, choices=[1], dest='ffmpeg', 
                     help="If specified, it will start a certain number of ffmpeg processes")
 parser.add_argument('--audio_file', '-af', type=str, dest='audio_file', help="Path of the audio to ffmpeg")
 parser.add_argument('--tcpdump', '-t', type=str, dest='tcpdump', help='tcpdump interface')
 parser.add_argument('--generate_calls', "-gc", type=int, dest='generate_calls', 
-                    help='generate certain number of parallel calls with traffic')
+                    help='Generate certain number of parallel calls with traffic')
 parser.add_argument('--pcap', type=str, dest='pcap', help='pcap file for analyze')
+parser.add_argument('--sdpaddress', '-saddr', type=str, dest='sdpaddr', default='127.0.0.1',
+                    help='This the sender local address')
 
 # Proxy part
 parser.add_argument('--server', '-s', type=int, dest='server', choices=[0,1], 
                     help='1 - proxy mode, 0 - simple mode')
 parser.add_argument('--server_address', '-sa', type=str, dest='server_address', 
-                    help='listening address')
+                    help='Listening address')
 parser.add_argument('--server_port', '-sp', type=int, dest='server_port', 
-                    help='listening port') 
+                    help='Listening port') 
 args = parser.parse_args()
 
 # Set up the bancode library
@@ -99,7 +101,7 @@ def generateAnswer(call_id, label, from_tag, to_tag, port):
     data["command"] = "answer"
     data["from-tag"] = str(from_tag)
     data["label"] = str(label)
-    data["sdp"] = "v=0\r\no=- 1607446271 1 IN IP4 127.0.0.1\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 127.0.0.1\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
+    data["sdp"] = "v=0\r\no=- 1607446271 1 IN IP4 " + args.sdpaddr + "\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 " + args.sdpaddr + "\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
     data["to-tag"] = str(to_tag)
     return data
 
@@ -111,7 +113,7 @@ def generateOffer(call_id, label, from_tag, port):
     data["command"] = "offer"
     data["from-tag"] = str(from_tag)
     data["label"] = str(label)
-    data["sdp"] = "v=0\r\no=- 1607444729 1 IN IP4 127.0.0.1\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 127.0.0.1\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
+    data["sdp"] = "v=0\r\no=- 1607444729 1 IN IP4 " + args.sdpaddr + "\r\ns=tester\r\nt=0 0\r\nm=audio " + str(port) + " RTP/AVP 0\r\nc=IN IP4 " + args.sdpaddr + "\r\na=sendrecv\r\na=rtcp:" + str(port + 1)
     return data
 
 # Start a certain number of calls.
@@ -125,12 +127,12 @@ def generateCalls(cnt):
         # Send an offer 
         offer = send(generateOffer(str(start_port) + "-" + str(start_port + 2), "caller" + str(start_port), 
             "from-tag" + str(start_port), start_port), 
-            "127.0.0.1", start_port)
+            args.sdpaddr, start_port)
         start_port += 2
         # Send an answer
         answer = send(generateAnswer(str(start_port - 2) + "-" + str(start_port), "callee" + str(start_port), 
             "from-tag" + str(start_port - 2), "to-tag" + str(start_port), start_port), 
-            "127.0.0.1", start_port)
+            args.sdpaddr, start_port)
         # Parse the responses 
         parsed_offer = sdp_transform.parse(offer.get('sdp'))
         parsed_answer = sdp_transform.parse(answer.get('sdp'))
@@ -138,8 +140,8 @@ def generateCalls(cnt):
         offer_port = parsed_offer.get('media')[0].get('port')
         answer_port = parsed_answer.get('media')[0].get('port')
         # Generate addresses to send traffic to them 
-        offers.append("rtp://127.0.0.1:" + str(offer_port) + "?localrtpport=" + str(start_port - 2))
-        answers.append("rtp://127.0.0.1:" + str(answer_port) + "?localrtpport=" + str(start_port))
+        offers.append("rtp://" + args.addr + ":" + str(offer_port) + "?localrtpport=" + str(start_port - 2))
+        answers.append("rtp://" + args.addr + ":" + str(answer_port) + "?localrtpport=" + str(start_port))
     # Wait a second to close every port what the for loop is opened 
     time.sleep(1)
     # Start the streams 
@@ -152,7 +154,7 @@ if not args.server:
     if args.file:
         with open(args.file) as f:
             file = json.load(f)
-        response = send(file, "127.0.0.1", 3000)
+        response = send(file, args.sdpaddr, 3000)
         print(response)
     # Read files
     if args.offer:
@@ -196,10 +198,10 @@ if args.offer and args.answer and args.ffmpeg:
 if args.tcpdump:
     tcpdump_proc.terminate()
 
-if args.pcap:
-    scapy_cap = rdpcap(args.pcap)
-    for packet in scapy_cap:
-        print(packet.show())
+# if args.pcap:
+#     scapy_cap = rdpcap(args.pcap)
+#     for packet in scapy_cap:
+#         print(packet.show())
 
 # TODO: Somehow make statistics about the traffic quality 
 # Maybe you van use pyshark or a tcpdump subprocess
