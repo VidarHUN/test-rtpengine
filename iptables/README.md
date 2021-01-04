@@ -181,7 +181,7 @@ python clients/python/app.py -gc 300 -af audios/recording.wav
 
 Please be aware that kind of load with ffmpeg could freeze your computer. 
 
-If the script is running pleas check the `list` and `status` under the 
+If the script is running please check the `list` and `status` under the 
 `/proc/rtpengine/42` folder. The `status` file should contain 600 targets 
 and the `list` files should describe the calls like this: 
 
