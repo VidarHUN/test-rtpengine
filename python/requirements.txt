@@ -1,0 +1,3 @@
+bencode.py==4.0.0
+sdp-transform==1.0.0
+simplejson==3.13.2
