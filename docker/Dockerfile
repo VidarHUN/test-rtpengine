@@ -14,14 +14,11 @@ RUN apt-get update \
   && cp /usr/local/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine \
   && rm -Rf /usr/local/src/rtpengine \
   && apt-get purge -y --quiet --force-yes --auto-remove \
-  ca-certificates gcc g++ make build-essential git markdown \
-  && rm -rf /var/lib/apt/* \
-  && rm -rf /var/lib/dpkg/* \
-  && rm -rf /var/lib/cache/* \
-  && rm -Rf /var/log/* \
-  && rm -Rf /usr/local/src/* \
-  && rm -Rf /var/lib/apt/lists/*
+  ca-certificates gcc g++ make build-essential git markdown 
 
 VOLUME ["/tmp"]
+
+COPY ./entrypoint.sh /
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 EXPOSE 23000-32768/udp 22222/udp
