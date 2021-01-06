@@ -101,6 +101,57 @@ Current sessions total: 3
 
 ## Test
 
+### Localhost
+#### Redis 
+
+Start the redis server: 
+
+```
+redis-server
+```
+
+And now set up the keyspace notification event and check every keyspace and keyevent events: 
+
+```
+redis-cli config set notify-keyspace-events KEA
+redis-cli --csv psubscribe '__key*__:*'
+```
+
+#### Rtpengines 
+
+The first one: 
+
+```
+sudo rtpengine --interface=pub1/127.0.0.2 --interface=pub2/127.0.0.3 --redis=127.0.0.1:6379/1 \
+--subscribe-keyspace=2 --foreground=true --log-stderr=true --listen-ng=127.0.0.2:22222 --log-level=6 \
+--delete-delay=0 --timeout=600 --port-min=23000 --port-max=30000
+```
+
+The second one:
+
+```
+sudo rtpengine --interface=pub2/127.0.0.3 --interface=pub1/127.0.0.2 --redis=127.0.0.1:6379/2 \
+--subscribe-keyspace=1 --foreground=true --log-stderr=true --listen-ng=127.0.0.3:22222 --log-level=6 \
+--delete-delay=0 --timeout=600 --port-min=23000 --port-max=30000
+```
+
+#### Generate traffic
+
+Generate traffic with the python client: 
+
+```
+python python/app.py -af python/recording1h.wav -gc 1 -addr 127.0.0.2 -p 22222 
+```
+
+This generate a call with offer and answer and after it start streaming a bidirectional one hour
+PCM audio file. 
+
+#### Tests 
+
+TODO: Some network test to prove the traffic is really flow between the caller and the callee.  
+
+### Docker
+
 First make a redis db.
 
 ```
