@@ -60,7 +60,6 @@ def send(file, bind_address, bind_port):
     sock.bind((bind_address, bind_port))
     server_address = (args.addr, args.port)
 
-    print(server_address)
     # Generate ng message
     cookie = gen_cookie(5)
     data = bencodepy.encode(file).decode() # Here goes all of the data, decode needed to remove b'
