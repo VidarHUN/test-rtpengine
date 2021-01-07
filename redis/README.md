@@ -101,6 +101,20 @@ Current sessions total: 3
 
 ## Test
 
+<p align="center">
+  <img src="./images/setup-Redis.png">
+</p>
+
+### Scenario
+
+1. The client create an RTP session on **RTPengine1** with active **IP_1**.
+2. Traffic arrives to RTPengine1 and save session information in **Redis master, keyspace 1**.
+3. Redis master replicates information to Redis slaves. 
+4. On RTPengine2 the Redis slave will notify the RTPengine2 about the call and it will create 
+  a new session based on the given call information on **IP_1**.
+5. Somehow the RTPengien1 is crash. 
+6. Traffic routed via alternative route through RTPengine2. 
+
 ### Localhost
 #### Redis 
 
@@ -116,6 +130,12 @@ And now set up the keyspace notification event and check every keyspace and keye
 redis-cli config set notify-keyspace-events KEA
 redis-cli --csv psubscribe '__key*__:*'
 ```
+
+Where the `KEA` stands for: 
+
+- **K**: Notify on *Keyspace* events.
+- **E**: Notify on *Keyevents* events.
+- **A**: Alias for every other commands except when the keyspace is missing. 
 
 #### Rtpengines 
 
@@ -148,7 +168,25 @@ PCM audio file.
 
 #### Tests 
 
-TODO: Some network test to prove the traffic is really flow between the caller and the callee.  
+Details:
+- Caller address: `127.0.0.1:3002`
+- Callee address: `127.0.0.1:3004`
+- Caller RTPengine address: `127.0.0.2:23000`
+- Callee RTPengine address: `127.0.0.2:23010`
+
+Used tcpdump command: `sudo tcpdump -i lo udp -vvn -w traffic.pcap`
+
+Changes in audio: 
+
+<p align="center">
+  <img src="./images/rtpe_caller.png">
+</p>
+
+As you can see there is two gap in the `23000-3002` stream. The first one start from 17.65s to 17.83s
+and the second one start from 17.9s to 18.05s. So this gap in summary is around 0.33s which is not 
+too much.
+
+The jitter and the delay is almost the same as in a normal situation. 
 
 ### Docker
 
