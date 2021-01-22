@@ -191,8 +191,8 @@ else:
 
 if args.offer and args.answer and args.ffmpeg:
     time.sleep(1)
-    offer_rtp_address = ["rtp://127.0.0.1:" + str(offer_rtp_port) + "?localrtpport=" + str(args.bind_offer[1])]
-    answer_rtp_address = ["rtp://127.0.0.1:" + str(answer_rtp_port) + "?localrtpport=" + str(args.bind_answer[1])]
+    offer_rtp_address = ["rtp://" + args.addr + ":" + str(offer_rtp_port) + "?localrtpport=" + str(args.bind_offer[1])]
+    answer_rtp_address = ["rtp://" + args.addr + ":" + str(answer_rtp_port) + "?localrtpport=" + str(args.bind_answer[1])]
     ffmpeg(1, offer_rtp_address, answer_rtp_address)
 
 if args.tcpdump:

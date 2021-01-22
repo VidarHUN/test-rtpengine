@@ -16,22 +16,26 @@ services:
       - "6379:6379/udp"
   rtpengine1:
     image: "vidarhun/rtpengine"
-    networks:
-      default:
-        ipv4_address: "172.18.0.31"
+    # networks:
+    #   default:
+    #     ipv4_address: "172.18.0.31"
     ports:
       - "22222:22222/udp"
     command:
       - rtpengine
-      - --interface=pub1/172.18.0.31
-      - --interface=pub2/172.18.0.32
-      - --interface=pub3/172.18.0.33
+      # - --interface=pub1/172.18.0.31
+      # - --interface=pub2/172.18.0.32
+      # - --interface=pub3/172.18.0.33
+      - --interface=pub1/rtpengine1
+      - --interface=pub2/rtpengine2
+      - --interface=pub3/rtpengine3
       - --redis=172.18.0.30:6379/1
       - --redis-write=172.18.0.30:6379/1
       - --subscribe-keyspace=2;3
       - --foreground=true
       - --log-stderr=true
-      - --listen-ng=172.18.0.31:22222
+      # - --listen-ng=172.18.0.31:22222
+      - --listen-ng=rtpengine1:22222
       - --log-level=6
       - --delete-delay=0
       - --timeout=600
@@ -39,22 +43,26 @@ services:
       - --port-max=50000
   rtpengine2:
     image: "vidarhun/rtpengine"
-    networks:
-      default:
-        ipv4_address: "172.18.0.32"
+    # networks:
+    #   default:
+    #     ipv4_address: "172.18.0.32"
     ports:
       - "22223:22222/udp"
     command:
       - rtpengine
-      - --interface=pub2/172.18.0.32
-      - --interface=pub3/172.18.0.33
-      - --interface=pub1/172.18.0.31
+      # - --interface=pub2/172.18.0.32
+      # - --interface=pub3/172.18.0.33
+      # - --interface=pub1/172.18.0.31
+      - --interface=pub2/rtpengine2
+      - --interface=pub3/rtpengine3
+      - --interface=pub1/rtpengine1
       - --redis=172.18.0.30:6379/2
       - --redis-write=172.18.0.30:6379/2
       - --subscribe-keyspace=3;1
       - --foreground=true
       - --log-stderr=true
-      - --listen-ng=172.18.0.32:22222
+      # - --listen-ng=172.18.0.32:22222
+      - --listen-ng=rtpengine2:22222
       - --log-level=6
       - --delete-delay=0
       - --timeout=600
@@ -62,24 +70,27 @@ services:
       - --port-max=30000
   rtpengine3:
     image: "vidarhun/rtpengine"
-    networks:
-      default:
-        ipv4_address: "172.18.0.33"
+    # networks:
+    #   default:
+    #     ipv4_address: "172.18.0.33"
     ports:
       - "22224:22222/udp"
     command:
       - rtpengine
-      # - --interface=pub3/172.18.0.33;pub1/172.18.0.31;pub2/172.18.0.32
-      - --interface=pub3/172.18.0.33
-      - --interface=pub1/172.18.0.31
-      - --interface=pub2/172.18.0.32
+      # - --interface=pub3/172.18.0.33
+      # - --interface=pub1/172.18.0.31
+      # - --interface=pub2/172.18.0.32
+      - --interface=pub3/rtpengine3
+      - --interface=pub1/rtpengine1
+      - --interface=pub2/rtpengine2
       - --redis=172.18.0.30:6379/3
       - --redis-write=172.18.0.30:6379/3
       - --subscribe-keyspace=1;2
       - --foreground=true
       - --log-stderr=true
-      - --listen-ng=172.18.0.33:22222
-      - --log-level=7
+      # - --listen-ng=172.18.0.33:22222
+      - --listen-ng=rtpengine3:22222
+      - --log-level=6
       - --delete-delay=0
       - --timeout=600
       - --port-min=23000

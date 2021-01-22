@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtpengine-deployment
+  labels:
+    app: rtpengine
+spec:
+  selector:
+    matchLabels:
+      app: rtpengine
+  template:
+    metadata:
+      labels:
+        app: rtpengine
+    spec:
+      containers:
+        - name: rtpengine
+          image: vidarhun/rtpengine
+          command: ["rtpengine"]
+          args: ["--config-file", "/etc/rtpengine/rtpengine.conf"]
+          ports:
+            - containerPort: 22222
+              protocol: UDP
+          volumeMounts:
+            - name: rtpengine-config
+              mountPath: "/etc/rtpengine"
+      volumes:
+        - name: rtpengine-config
+          configMap:
+            name: rtpengine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtpengine1
+  annotations:
+    "cni.projectcalico.org/floatingIPs": '["10.244.200.1", "10.244.200.2"]'
+spec:
+  containers:
+    - name: rtpengine
+      image: vidarhun/rtpengine
+      command: ["rtpengine"]
+      args: ["--config-file", "/etc/rtpengine/rtpengine.conf"]
+      ports:
+        - containerPort: 22222
+          protocol: UDP
+      volumeMounts:
+        - name: rtpengine-config
+          mountPath: "/etc/rtpengine"
+  volumes:
+    - name: rtpengine-config
+      configMap:
+        name: rtpengine
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rtpengine
+data:
+  rtpengine.conf: |
+    [rtpengine]
+    interface=127.0.0.1
+    foreground=true
+    log-stderr=true
+    listen-ng=0.0.0.0:22222
+    port-min=23000
+    port-max=32768
+    recording-dir=/tmp
+    recording-method=pcap
+    recording-format=eth
+    log-level=6
+    delete-delay=0
+    timeout=600
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rtpengine
+  labels:
+    app: rtpengine-service
+spec:
+  selector:
+    app: rtpengine
+  type: NodePort
+  ports:
+    - protocol: UDP
+      port: 22222
+      targetPort: 22222
+      nodePort: 32000
